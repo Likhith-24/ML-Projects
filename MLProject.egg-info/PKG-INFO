@@ -3,8 +3,3 @@ Name: MLProject
 Version: 0.0.1
 Author: Likhith
 Author-email: v.likhith.01@gmail.com
-Requires-Dist: pandas
-Requires-Dist: numpy
-Requires-Dist: seaborn
-Requires-Dist: matplotlib
-Requires-Dist: scikit-learn
