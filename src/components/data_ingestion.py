@@ -12,7 +12,8 @@ from dataclasses import dataclass #Used for creating class variables
 
 from src.components.data_transformation import DataTransformation #To get the preprocessor object
 from src.components.data_transformation import DataTransformationConfig #To get the path of preprocessor object
-
+from src.components.model_trainer import ModelTrainer #To get the best model
+from src.components.model_trainer import ModelTrainerConfig #To get the path of trained model
 
 @dataclass #Used for defining custom class variables
 class DataIngestionConfig:
@@ -58,4 +59,7 @@ if __name__ == "__main__":
     train_data, test_data = obj.initiate_data_ingestion()
     
     data_transformation = DataTransformation()
-    data_transformation.initiate_data_transformation(train_data, test_data)
+    train_arr,test_arr,_ = data_transformation.initiate_data_transformation(train_data, test_data)
+
+    model_trainer = ModelTrainer()
+    print(model_trainer.initiate_model_trainer(train_arr,test_arr))
