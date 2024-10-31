@@ -10,6 +10,10 @@ import pandas as pd #For working with dataframes
 from sklearn.model_selection import train_test_split #For splitting the data into train and test data
 from dataclasses import dataclass #Used for creating class variables
 
+from src.components.data_transformation import DataTransformation #To get the preprocessor object
+from src.components.data_transformation import DataTransformationConfig #To get the path of preprocessor object
+
+
 @dataclass #Used for defining custom class variables
 class DataIngestionConfig:
     train_data_path: str=os.path.join('artifacts',"train.csv") # Path for output train data
@@ -36,7 +40,6 @@ class DataIngestion: #For other functions inside class within custom class
             train_set,test_set=train_test_split(df,test_size=0.2,random_state=42) #Splitting the data into train and test data
 
             train_set.to_csv(self.ingestion_config.train_data_path,index=False,header=True) #Saving the train data
-
             test_set.to_csv(self.ingestion_config.test_data_path,index=False,header=True) #Saving the train data
             logging.info("Data Ingestion is completed")
         
@@ -52,4 +55,7 @@ class DataIngestion: #For other functions inside class within custom class
         
 if __name__ == "__main__":
     obj=DataIngestion()
-    obj.initiate_data_ingestion()
+    train_data, test_data = obj.initiate_data_ingestion()
+    
+    data_transformation = DataTransformation()
+    data_transformation.initiate_data_transformation(train_data, test_data)
