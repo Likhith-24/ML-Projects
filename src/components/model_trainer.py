@@ -1,5 +1,4 @@
-import os
-import sys
+import sys, os
 from dataclasses import dataclass
 
 from catboost import CatBoostRegressor
@@ -8,6 +7,7 @@ from sklearn.ensemble import (
     GradientBoostingRegressor,
     RandomForestRegressor,
 )
+
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.neighbors import KNeighborsRegressor
@@ -21,22 +21,25 @@ from src.utils import save_object,evaluate_models
 
 @dataclass
 class ModelTrainerConfig:
-    trained_model_file_path=os.path.join("artifacts","model.pkl")
+    trained_model_file_path=os.path.join('artifacts','trained_model.pkl')
 
 class ModelTrainer:
     def __init__(self):
-        self.model_trainer_config=ModelTrainerConfig()
+        self.model_trainer_config = ModelTrainerConfig()
 
 
     def initiate_model_trainer(self,train_array,test_array):
         try:
-            logging.info("Split training and test input data")
-            X_train,y_train,X_test,y_test=(
+            
+            logging.info("Splitting training and testing input data")
+            
+            X_train,y_train,X_test,y_test = (
                 train_array[:,:-1],
                 train_array[:,-1],
                 test_array[:,:-1],
-                test_array[:,-1]
-            )
+                test_array[:,-1],
+                ) # Splitting the data into X_train, y_train, X_test, y_test
+            
             models = {
                 "Random Forest": RandomForestRegressor(),
                 "Decision Tree": DecisionTreeRegressor(),
@@ -46,6 +49,7 @@ class ModelTrainer:
                 "CatBoosting Regressor": CatBoostRegressor(verbose=False),
                 "AdaBoost Regressor": AdaBoostRegressor(),
             }
+            
             params={
                 "Decision Tree": {
                     'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
@@ -83,12 +87,18 @@ class ModelTrainer:
                 }
                 
             }
-
-            model_report:dict=evaluate_models(X_train=X_train,y_train=y_train,X_test=X_test,y_test=y_test,
-                                             models=models,param=params)
             
-            ## To get best model score from dict
-            best_model_score = max(sorted(model_report.values()))
+            model_report:dict = evaluate_models(
+                X_train=X_train,
+                y_train=y_train,
+                X_test=X_test,
+                y_test=y_test,
+                models=models,
+                params=params,
+                )
+
+             ## To get best model score from dict
+            best_model_score=max(sorted(model_report.values()))
 
             ## To get best model name from dict
 
@@ -98,22 +108,21 @@ class ModelTrainer:
             best_model = models[best_model_name]
 
             if best_model_score<0.6:
-                raise CustomException("No best model found")
-            logging.info(f"Best found model on both training and testing dataset")
+                raise CustomException("No best model found",sys)
+            logging.info("Best found model on both training and testing dataset")
+
 
             save_object(
                 file_path=self.model_trainer_config.trained_model_file_path,
-                obj=best_model
+                obj = best_model
             )
 
-            predicted=best_model.predict(X_test)
+            predicted = best_model.predict(X_test) # Predicting the values for the test data
+            
+            r2_square = r2_score(y_test,predicted) # Getting the R2 score for the test data
 
-            r2_square = r2_score(y_test, predicted)
             return r2_square
-            
 
-
-
-            
         except Exception as e:
             raise CustomException(e,sys)
+        
